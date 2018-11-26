@@ -34,7 +34,8 @@ m.update( HOST + ":" + EVENT)
 file = "/tmp/opsgenie-" + m.hexdigest()
 if os.path.isfile( file ):
     st = os.stat( file )
-    if time.time() - st.st_mtime > 14400:
+    # If the alert is over 4 hours old, re-fire.
+    if time.time() - st.st_mtime < 14400:
         print "%s exists", file
         exit( 1 )
 
