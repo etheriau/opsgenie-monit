@@ -1,0 +1,74 @@
+#!/usr/bin/python
+
+from opsgenie import OpsGenie
+from opsgenie.config import Configuration
+from opsgenie.swagger_client import AlertApi
+from opsgenie.swagger_client.models import *
+from opsgenie.swagger_client.rest import ApiException
+import socket
+import hashlib
+import os
+import time
+import sys
+import time
+
+API_KEY = "YOUR_API_KEY"
+
+if API_KEY is "YOUR_API_KEY":
+    print "Must specify API_KEY!"
+    exit( 1 )
+
+if len(sys.argv) == 1:
+    print "%s <issue>", sys.argv[0]
+    exit( 1 )
+
+config = Configuration(apikey=API_KEY)
+client = OpsGenie(config)
+
+EVENT=sys.argv[1]
+HOST=socket.gethostname()
+
+m = hashlib.md5()
+m.update( HOST + ":" + EVENT)
+
+file = "/tmp/opsgenie-" + m.hexdigest()
+if os.path.isfile( file ):
+    st = os.stat( file )
+    if time.time() - st.st_mtime > 14400:
+        print "%s exists", file
+        exit( 1 )
+
+body = CreateAlertRequest(
+    message=EVENT + " failed on " + HOST,
+    entity=HOST,
+    priority='P4')
+
+try:
+    create_response = AlertApi().create_alert(body=body)
+
+    print('request id: {}'.format(create_response.request_id))
+    print('took: {}'.format(create_response.took))
+    print('result: {}'.format(create_response.result))
+
+    # TODO: Need a better way to do this...
+    time.sleep(5)
+
+    response = AlertApi().get_request_status(request_id="c86cc318-d64b-46e7-8ea1-2ad28b55ea7d")
+
+    print('request id: {}'.format(response.request_id))
+    print('took: {}'.format(response.took))
+    # Refer to GetRequestStatusResponse for more detailed data
+    print('data.alert_id: {}'.format(response.data.alert_id))
+    print('data.alias: {}'.format(response.data.alias))
+    print('data.integration_id: {}'.format(response.data.integration_id))
+    print('data.is_success: {}'.format(response.data.is_success))
+    print('data.processed_at: {}'.format(response.data.processed_at))
+    print('data.action: {}'.format(response.data.action))
+    print('data.status: {}'.format(response.data.status))
+
+    f = open( file, "w+" )
+    f.write( format(response.data.alert_id) )
+    f.close()
+except ApiException as err:
+    print("Exception when calling AlertApi->create_alert: %s\n" % err)
+    exit( 1 )
