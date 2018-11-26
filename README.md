@@ -22,7 +22,7 @@ See https://docs.opsgenie.com/docs/opsgenie-python-api for more information.
 
 ## To configure OpsGenie ##
 
-To configure OpsGenie,
+To configure OpsGenie:
 
 * login as an administrator
 * Go to teams https://app.opsgenie.com/teams
@@ -32,6 +32,11 @@ To configure OpsGenie,
 * Select API
 * Copy the API Key
 * Replace the `YOUR_API_KEY` in `API_KEY = "YOUR_API_KEY"` with your key in both scripts
+
+Other Configuration parameters:
+
+* `REALERT_AFTER_4_HOURS`: By default, each alert will only be fired once. This allows the
+alert to re-fire after 4 hours.
 
 ## To configure Monit ##
 

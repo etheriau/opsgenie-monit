@@ -12,7 +12,18 @@ import time
 import sys
 import time
 
+#
+# CONFIGURATION
+# See README for details
+#
 API_KEY = "YOUR_API_KEY"
+
+# If True, this will re-alert after 4 hours of being in error state.
+REALERT_AFTER_4_HOURS = False
+
+#
+# END CONFIGURATION
+#
 
 if API_KEY is "YOUR_API_KEY":
     print "Must specify API_KEY!"
@@ -35,7 +46,8 @@ file = "/tmp/opsgenie-" + m.hexdigest()
 if os.path.isfile( file ):
     st = os.stat( file )
     # If the alert is over 4 hours old, re-fire.
-    if time.time() - st.st_mtime < 14400:
+    # TODO: Consider resolving the initial alert?
+    if not REALERT_AFTER_4_HOURS or time.time() - st.st_mtime < 14400:
         print "%s exists", file
         exit( 1 )
 
