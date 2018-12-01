@@ -53,3 +53,11 @@ Example monit stanza to trigger an incident if nginx is not present:
         else if passed for 3 cycles
             then exec "/etc/monit/opsgenie-resolve nginx"
 
+
+## Other Uses ##
+
+While the script is written for monit specifically, we use it for a variety of alerts, especially for repeated triggers.  The use is:
+
+```
+    /etc/monit/opsgenie-trigger <summary> <description>
+```
