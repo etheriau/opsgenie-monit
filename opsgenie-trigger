@@ -30,13 +30,16 @@ if API_KEY is "YOUR_API_KEY":
     exit( 1 )
 
 if len(sys.argv) == 1:
-    print "%s <issue>", sys.argv[0]
+    print "%s <issue> [<description>]", sys.argv[0]
     exit( 1 )
 
 config = Configuration(apikey=API_KEY)
 client = OpsGenie(config)
 
 EVENT=sys.argv[1]
+DESCRIPTION=EVENT;
+if len(sys.argv) >= 3:
+    DESCRIPTION=sys.argv[2]
 HOST=socket.gethostname()
 
 m = hashlib.md5()
@@ -53,6 +56,7 @@ if os.path.isfile( file ):
 
 body = CreateAlertRequest(
     message=EVENT + " failed on " + HOST,
+    description=DESCRIPTION,
     entity=HOST,
     priority='P4')
 
