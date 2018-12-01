@@ -70,7 +70,7 @@ try:
     # TODO: Need a better way to do this...
     time.sleep(5)
 
-    response = AlertApi().get_request_status(request_id="c86cc318-d64b-46e7-8ea1-2ad28b55ea7d")
+    response = AlertApi().get_request_status(request_id=create_response.request_id)
 
     print('request id: {}'.format(response.request_id))
     print('took: {}'.format(response.took))
