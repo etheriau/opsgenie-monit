@@ -10,6 +10,7 @@ import hashlib
 import os
 import time
 import sys
+import argparse
 
 #
 # CONFIGURATION
@@ -22,18 +23,21 @@ API_KEY = "YOUR_API_KEY"
 # END CONFIGURATION
 #
 
+# True if you don't want to use files for realerting
+DONT_USE_FILES = False
+
+parser = argparse.ArgumentParser( description='Resolves an opsgenie-alert' )
+parser.add_argument( 'args', metavar='N', nargs='+', help='issue' )
+args = parser.parse_args()
+
 if API_KEY is "YOUR_API_KEY":
     print "Must specify API_KEY!"
-    exit( 1 )
-
-if len(sys.argv) == 1:
-    print "%s <issue>", sys.argv[0]
     exit( 1 )
 
 config = Configuration(apikey=API_KEY)
 client = OpsGenie(config)
 
-EVENT=sys.argv[1]
+EVENT=args.args[0]
 HOST=socket.gethostname()
 
 m = hashlib.md5()
@@ -41,7 +45,7 @@ m.update( HOST + ":" + EVENT)
 
 file = "/tmp/opsgenie-" + m.hexdigest()
 if not os.path.isfile( file ):
-    print "%s does not exist", file
+    print "%s does not exist" % file
     exit( 1 )
 
 with open (file, "r") as myfile:

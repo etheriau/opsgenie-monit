@@ -59,5 +59,9 @@ Example monit stanza to trigger an incident if nginx is not present:
 While the script is written for monit specifically, we use it for a variety of alerts, especially for repeated triggers.  The use is:
 
 ```
-    /etc/monit/opsgenie-trigger <summary> <description>
+    /etc/monit/opsgenie-trigger <summary> --description <description>
 ```
+
+By default, the script is designed to fire new alerts only if one hasn't been recently fired.  This is done via a file.  You can disable this capability via `--dontUseFiles`.
+
+Also, by default, the alert will not refire after 4 hours.  You can enable this feature via `--realert`.

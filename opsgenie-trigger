@@ -11,6 +11,7 @@ import os
 import time
 import sys
 import time
+import argparse
 
 #
 # CONFIGURATION
@@ -21,6 +22,16 @@ API_KEY = "YOUR_API_KEY"
 # If True, this will re-alert after 4 hours of being in error state.
 REALERT_AFTER_4_HOURS = False
 
+# True if you don't want to use files for realerting
+DONT_USE_FILES = False
+
+parser = argparse.ArgumentParser( description='Triggers an opsgenie-alert' )
+parser.add_argument( 'args', metavar='N', nargs='+', help='issue description' )
+parser.add_argument( '--description', help='Description of the issue' )
+parser.add_argument( '--dontUseFiles', action='store_true', help='True if you wish to not use files for deduping alerts' )
+parser.add_argument( '--realert', action='store_true', help='True if you wish to realert after 4 hours' )
+args = parser.parse_args()
+
 #
 # END CONFIGURATION
 #
@@ -29,29 +40,32 @@ if API_KEY is "YOUR_API_KEY":
     print "Must specify API_KEY!"
     exit( 1 )
 
-if len(sys.argv) == 1:
-    print "%s <issue> [<description>]", sys.argv[0]
-    exit( 1 )
-
 config = Configuration(apikey=API_KEY)
 client = OpsGenie(config)
 
-EVENT=sys.argv[1]
-DESCRIPTION=EVENT;
-if len(sys.argv) >= 3:
-    DESCRIPTION=sys.argv[2]
+EVENT=args.args[0]
 HOST=socket.gethostname()
+DESCRIPTION=EVENT;
+if args.description:
+    DESCRIPTION=args.description
+# Technically the --description is optional
+if len(args.args) >= 2:
+    DESCRIPTION=args.args[1]
+if args.dontUseFiles:
+    DONT_USE_FILES=args.dontUseFiles
+if args.realert:
+    REALERT_AFTER_4_HOURS=args.realert
 
 m = hashlib.md5()
 m.update( HOST + ":" + EVENT)
 
 file = "/tmp/opsgenie-" + m.hexdigest()
-if os.path.isfile( file ):
+if not DONT_USE_FILES and os.path.isfile( file ):
     st = os.stat( file )
     # If the alert is over 4 hours old, re-fire.
     # TODO: Consider resolving the initial alert?
     if not REALERT_AFTER_4_HOURS or time.time() - st.st_mtime < 14400:
-        print "%s exists", file
+        print( "%s exists" % file
         exit( 1 )
 
 body = CreateAlertRequest(
@@ -83,9 +97,10 @@ try:
     print('data.action: {}'.format(response.data.action))
     print('data.status: {}'.format(response.data.status))
 
-    f = open( file, "w+" )
-    f.write( format(response.data.alert_id) )
-    f.close()
+    if not DONT_USE_FILES:
+        f = open( file, "w+" )
+        f.write( format(response.data.alert_id) )
+        f.close()
 except ApiException as err:
     print("Exception when calling AlertApi->create_alert: %s\n" % err)
     exit( 1 )
