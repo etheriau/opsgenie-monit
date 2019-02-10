@@ -65,7 +65,7 @@ if not DONT_USE_FILES and os.path.isfile( file ):
     # If the alert is over 4 hours old, re-fire.
     # TODO: Consider resolving the initial alert?
     if not REALERT_AFTER_4_HOURS or time.time() - st.st_mtime < 14400:
-        print( "%s exists" % file
+        print "%s exists" % file
         exit( 1 )
 
 body = CreateAlertRequest(
