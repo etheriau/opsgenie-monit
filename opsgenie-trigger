@@ -1,10 +1,5 @@
 #!/usr/bin/python
-
-from opsgenie import OpsGenie
-from opsgenie.config import Configuration
-from opsgenie.swagger_client import AlertApi
-from opsgenie.swagger_client.models import *
-from opsgenie.swagger_client.rest import ApiException
+import opsgenie_sdk
 import socket
 import hashlib
 import os
@@ -40,8 +35,9 @@ if API_KEY is "YOUR_API_KEY":
     print("Must specify API_KEY!")
     exit( 1 )
 
-config = Configuration(apikey=API_KEY)
-client = OpsGenie(config)
+config = opsgenie_sdk.Configuration()
+config.api_key['Authorization'] = API_KEY
+client = opsgenie_sdk.ApiClient(config)
 
 EVENT=args.args[0]
 HOST=socket.gethostname()
@@ -68,14 +64,14 @@ if not DONT_USE_FILES and os.path.isfile( file ):
         print("%s exists" % file)
         exit( 1 )
 
-body = CreateAlertRequest(
+body = opsgenie_sdk.CreateAlertPayload(
     message=EVENT + " failed on " + HOST,
     description=DESCRIPTION,
     entity=HOST,
     priority='P4')
 
 try:
-    create_response = AlertApi().create_alert(body=body)
+    create_response = opsgenie_sdk.AlertApi(client).create_alert(body)
 
     print('request id: {}'.format(create_response.request_id))
     print('took: {}'.format(create_response.took))
@@ -84,7 +80,7 @@ try:
     # TODO: Need a better way to do this...
     time.sleep(5)
 
-    response = AlertApi().get_request_status(request_id=create_response.request_id)
+    response = opsgenie_sdk.AlertApi(client).get_request_status(request_id=create_response.request_id)
 
     print('request id: {}'.format(response.request_id))
     print('took: {}'.format(response.took))
@@ -101,6 +97,6 @@ try:
         f = open( file, "w+" )
         f.write( format(response.data.alert_id) )
         f.close()
-except ApiException as err:
+except opsgenie_sdk.ApiException as err:
     print("Exception when calling AlertApi->create_alert: %s\n" % err)
     exit( 1 )

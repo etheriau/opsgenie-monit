@@ -1,10 +1,6 @@
 #!/usr/bin/python
 
-from opsgenie import OpsGenie
-from opsgenie.config import Configuration
-from opsgenie.swagger_client import AlertApi
-from opsgenie.swagger_client.models import *
-from opsgenie.swagger_client.rest import ApiException
+import opsgenie_sdk
 import socket
 import hashlib
 import os
@@ -34,8 +30,9 @@ if API_KEY is "YOUR_API_KEY":
     print("Must specify API_KEY!")
     exit( 1 )
 
-config = Configuration(apikey=API_KEY)
-client = OpsGenie(config)
+config = opsgenie_sdk.Configuration()
+config.api_key['Authorization'] = API_KEY
+client = opsgenie_sdk.ApiClient(config)
 
 EVENT=args.args[0]
 HOST=socket.gethostname()
@@ -53,10 +50,10 @@ with open (file, "r") as myfile:
 
 print(IDENTIFIER)
 
-body = CloseAlertRequest(
+body = opsgenie_sdk.CloseAlertPayload(
     note='Condition resolved')
 try:
-    response = AlertApi().close_alert(identifier=IDENTIFIER[0], identifier_type='id', body=body)
+    response = opsgenie_sdk.AlertApi(client).close_alert(identifier=IDENTIFIER[0], identifier_type='id', close_alert_payload=body)
 
 
     print('request id: {}'.format(response.request_id))
@@ -64,6 +61,6 @@ try:
     print('result: {}'.format(response.result))
 
     os.remove( file )
-except ApiException as err:
-    print("Exception when calling AlertApi->create_alert: %s\n" % err)
+except opsgenie_sdk.ApiException as err:
+    print("Exception when calling AlertApi->close_alert: %s\n" % err)
     exit( 1 )
