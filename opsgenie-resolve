@@ -31,7 +31,7 @@ parser.add_argument( 'args', metavar='N', nargs='+', help='issue' )
 args = parser.parse_args()
 
 if API_KEY is "YOUR_API_KEY":
-    print "Must specify API_KEY!"
+    print("Must specify API_KEY!")
     exit( 1 )
 
 config = Configuration(apikey=API_KEY)
@@ -45,13 +45,13 @@ m.update( HOST + ":" + EVENT)
 
 file = "/tmp/opsgenie-" + m.hexdigest()
 if not os.path.isfile( file ):
-    print "%s does not exist" % file
+    print("%s does not exist" % file)
     exit( 1 )
 
 with open (file, "r") as myfile:
     IDENTIFIER=myfile.readlines()
 
-print IDENTIFIER
+print(IDENTIFIER)
 
 body = CloseAlertRequest(
     note='Condition resolved')
