@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import opsgenie_sdk
 import socket
 import hashlib
@@ -31,7 +31,7 @@ args = parser.parse_args()
 # END CONFIGURATION
 #
 
-if API_KEY is "YOUR_API_KEY":
+if API_KEY == "YOUR_API_KEY":
     print("Must specify API_KEY!")
     exit( 1 )
 
@@ -53,7 +53,7 @@ if args.realert:
     REALERT_AFTER_4_HOURS=args.realert
 
 m = hashlib.md5()
-m.update( HOST + ":" + EVENT)
+m.update((HOST + ":" + EVENT).encode('utf-8'))
 
 file = "/tmp/opsgenie-" + m.hexdigest()
 if not DONT_USE_FILES and os.path.isfile( file ):
