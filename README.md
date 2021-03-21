@@ -56,7 +56,7 @@ Example monit stanza to trigger an incident if nginx is not present:
 
 ## Other Uses ##
 
-While the script is written for monit specifically, we use it for a variety of alerts, especially for repeated triggers.  The use is:
+While the script is written for monit specifically, we use it for various alerts, especially for repeated triggers.  The use is:
 
 ```
     /etc/monit/opsgenie-trigger <summary> --description <description>
